@@ -4,7 +4,6 @@ const fs = require('fs');
 const csv = require('csv-parser');
 const MealBatch = require('./models/MealBatch');
 
-// --- CONFIGURATION ---
 const CSV_FILE_PATH = './mess_10s_kg_data.csv';
 const READINGS_PER_BATCH = 180; // 180 readings * 10s = 30 minutes
 
@@ -13,10 +12,6 @@ async function seedDatabase() {
     console.log("Connecting to MongoDB...");
     await mongoose.connect(process.env.MONGO_URI);
     console.log("✅ Connected. Preparing to read CSV...");
-
-    // Clear existing data (Optional: Remove this if you want to keep old data)
-    // await MealBatch.deleteMany({});
-    // console.log("🗑️ Cleared old database records.");
 
     const allRows = [];
 
@@ -43,7 +38,6 @@ async function seedDatabase() {
 
           // Process the 10-second intervals for this specific batch
           chunk.forEach((row, index) => {
-            // CSV columns: inflow_10s, total_waste_g
             cumulativePeople += parseInt(row.inflow_10s || 0);
             cumulativeWasteKg += parseFloat(row.total_waste_g || 0) / 1000.0; // Convert g to kg
 
@@ -80,7 +74,7 @@ async function seedDatabase() {
           await newBatch.save();
           console.log(`✅ Saved: ${newBatch.date} | ${newBatch.mealType} | Batch ${newBatch.batchNumber} (${chunk.length} readings)`);
 
-          // --- Shift Time and Metadata for the next chunk ---
+          // Shift Time and Metadata for the next chunk 
           currentDate = new Date(currentDate.getTime() + (READINGS_PER_BATCH * 10000));
           batchCounter++;
 

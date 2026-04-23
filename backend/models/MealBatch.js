@@ -5,15 +5,15 @@ const sensorDataSchema = new mongoose.Schema({
   timestamp: { type: Date, default: Date.now },
   total_people: { type: Number, default: 0 },
   trash_weight_kg: { type: Number, default: 0 }
-}, { _id: false }); // Saves DB space
+}, { _id: false }); 
 
 // The main 30-minute Batch schema
 const mealBatchSchema = new mongoose.Schema({
-  date: { type: String, required: true }, // e.g., "2026-04-22"
+  date: { type: String, required: true }, 
   mealType: { type: String, enum: ['breakfast', 'lunch', 'dinner'], required: true },
   batchNumber: { type: Number, required: true },
   startTime: { type: Date, default: Date.now },
-  endTime: { type: Date }, // Filled when "End Reading" or "Next Batch" is clicked
+  endTime: { type: Date }, 
   
   foodPrepared: {
     roti: { type: Number, default: 0 },
@@ -22,7 +22,7 @@ const mealBatchSchema = new mongoose.Schema({
     dal: { type: Number, default: 0 }
   },
 
-  sensorData: [sensorDataSchema] // Will hold ~180 readings per batch
+  sensorData: [sensorDataSchema] 
 });
 
 module.exports = mongoose.model('MealBatch', mealBatchSchema);

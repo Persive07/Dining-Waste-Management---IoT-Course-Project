@@ -26,26 +26,22 @@ function determineMealType() {
   return 'Dinner';
 }
 
-// --- SYSTEM STATE & LSTM SLIDING WINDOW ---
 let systemState = {
   isReading: false, expectedMeal: determineMealType(), mealType: 'none', batchNumber: 0,
   activeBatchId: null, live_count: 0, rate: 0, current_waste: 0.0,
   predictions: { rice: 'Standby', dal: 'Standby', roti: 'Standby', sabzi: 'Standby', status: 'Awaiting Start...' }
 };
 
-// Variables to track the last 10 seconds of activity
 let last_snapshot_people = 0;
 let last_snapshot_waste = 0.0;
-let slidingWindow = []; // Will hold the 6 most recent 10-second data arrays
+let slidingWindow = []; 
 
-// Reset tracking when a new session starts
 function resetTracking() {
   last_snapshot_people = 0;
   last_snapshot_waste = 0.0;
   slidingWindow = [];
 }
 
-// --- CALL THE PYTHON LSTM SERVER ---
 async function fetchAIPrediction(sequenceWindow) {
   try {
     const response = await fetch('http://127.0.0.1:5002/predict', {
@@ -60,7 +56,7 @@ async function fetchAIPrediction(sequenceWindow) {
     return {
       rice: `Cook ${aiData.Rice.toFixed(1)} kg`,
       dal: `Cook ${aiData.Dal.toFixed(1)} kg`,
-      roti: `Prepare ${Math.round(aiData.Roti)} count`, // Adjust logic if model outputs kg vs count
+      roti: `Prepare ${Math.round(aiData.Roti)} count`, 
       sabzi: `Cook ${aiData.Sabzi.toFixed(1)} kg`,
       status: `Live LSTM Optimization (Batch ${systemState.batchNumber + 1})`
     };
@@ -70,7 +66,7 @@ async function fetchAIPrediction(sequenceWindow) {
   }
 }
 
-// --- SENSORS POST ENDPOINTS ---
+// SENSORS POST ENDPOINTS 
 app.post('/api/sensors/entrance', (req, res) => {
   if(systemState.isReading) {
     systemState.live_count += req.body.new_entries || 0;
@@ -88,7 +84,7 @@ app.post('/api/sensors/waste', (req, res) => {
   res.status(200).send("OK");
 });
 
-// --- UI CONTROLS ---
+// UI CONTROLS
 app.post('/api/control/start-batch', async (req, res) => {
   if (systemState.activeBatchId) await MealBatch.findByIdAndUpdate(systemState.activeBatchId, { endTime: new Date() });
   
@@ -101,7 +97,7 @@ app.post('/api/control/start-batch', async (req, res) => {
   
   systemState.isReading = true; systemState.mealType = mealType; systemState.batchNumber = batchNum; systemState.activeBatchId = savedBatch._id;
   
-  if (isNewMeal) resetTracking(); // Clear the window for a fresh meal
+  if (isNewMeal) resetTracking(); 
   systemState.predictions.status = "Gathering Initial Sequence (0/60s)...";
   
   io.emit('system_update', systemState);
@@ -116,49 +112,43 @@ app.post('/api/control/end', async (req, res) => {
   res.status(200).send("Ended");
 });
 
-// --- THE 10-SECOND HEARTBEAT (DB Logging & LSTM Assembly) ---
 setInterval(async () => {
   if (!systemState.isReading || !systemState.activeBatchId) return;
 
-  // 1. Calculate Deltas (What happened in the last 10 seconds?)
   const delta_people = Math.max(0, systemState.live_count - last_snapshot_people);
   const delta_waste_kg = Math.max(0, systemState.current_waste - last_snapshot_waste);
   
-  // Update snapshots for the next loop
   last_snapshot_people = systemState.live_count;
   last_snapshot_waste = systemState.current_waste;
 
-  // 2. Format 10 Features for the LSTM
   const total_waste_g = delta_waste_kg * 1000;
-  const scores = { rice: 0.8, dal: 0.7, sabzi: 0.6, roti: 0.9 }; // Configurable
+  const scores = { rice: 0.8, dal: 0.7, sabzi: 0.6, roti: 0.9 }; 
   
   const features = [
-    new Date().getDay(), // Day (0-6)
-    delta_people,        // Inflow in last 10s
-    scores.rice, scores.dal, scores.sabzi, scores.roti, // 4 Scores
-    total_waste_g * 0.4, // waste_rice_g
-    total_waste_g * 0.2, // waste_dal_g
-    total_waste_g * 0.3, // waste_sabzi_g
-    total_waste_g * 0.1  // waste_roti_g
+    new Date().getDay(), 
+    delta_people,        
+    scores.rice, scores.dal, scores.sabzi, scores.roti, 
+    total_waste_g * 0.4, 
+    total_waste_g * 0.2, 
+    total_waste_g * 0.3, 
+    total_waste_g * 0.1  
   ];
 
-  // 3. Add to Sliding Window
+  // Add to Sliding Window
   slidingWindow.push(features);
   if (slidingWindow.length > 6) {
-    slidingWindow.shift(); // Keep only the last 6 steps
+    slidingWindow.shift(); 
   }
 
-  // 4. Trigger AI if we have a full 60-second sequence
   if (slidingWindow.length === 6) {
     systemState.predictions = await fetchAIPrediction(slidingWindow);
   } else {
-    // If we only have 3 readings, UI says "Gathering Initial Sequence (30/60s)..."
     systemState.predictions.status = `Gathering Sequence (${slidingWindow.length * 10}/60s)...`;
   }
 
   io.emit('system_update', systemState); // Push UI updates
 
-  // 5. Log to MongoDB
+  // Log to MongoDB
   try {
     await MealBatch.findByIdAndUpdate(systemState.activeBatchId, { 
       $push: { sensorData: { timestamp: new Date(), total_people: systemState.live_count, trash_weight_kg: systemState.current_waste } } 

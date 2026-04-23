@@ -15,5 +15,4 @@ __pycache__/
 # Mac system files
 .DS_Store
 
-# (Optional) Ignore large CSV datasets if they are over 100MB
 mess_10s_kg_data.csv
