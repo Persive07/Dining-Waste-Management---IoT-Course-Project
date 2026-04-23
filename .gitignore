@@ -1,0 +1,19 @@
+# Node modules
+node_modules/
+npm-debug.log
+yarn-error.log
+
+# Environment variables
+.env
+.env.local
+
+# Python environment & cache
+venv/
+__pycache__/
+*.pyc
+
+# Mac system files
+.DS_Store
+
+# (Optional) Ignore large CSV datasets if they are over 100MB
+mess_10s_kg_data.csv
