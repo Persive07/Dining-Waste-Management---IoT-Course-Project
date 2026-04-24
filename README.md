@@ -1,6 +1,6 @@
 # Dining Waste Management - IoT Course Project
 
-This repository contains the full codebase, integrating a MERN stack dashboard with LSTM projections and hardware sensor microservices.
+This repository contains the full codebase, integrating a MERN stack dashboard with LSTM projections and live feed from hardware sensors.
 
 ## Folder Structure
 
