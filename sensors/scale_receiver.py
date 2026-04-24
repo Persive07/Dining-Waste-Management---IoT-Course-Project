@@ -9,7 +9,7 @@ NODE_JS_URL = "http://127.0.0.1:5001/api/sensors/waste"
 def receive():
     data = request.json
 
-    weight_kg = float(data.get('weight', 0)) / 1000.0 
+    weight_kg = float(data.get('weight', 0))
     
     print(f"[SCALE] Received {weight_kg * 1000}g from ESP32. Forwarding to UI...")
     

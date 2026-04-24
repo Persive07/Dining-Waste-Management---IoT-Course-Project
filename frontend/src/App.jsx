@@ -41,7 +41,7 @@ function App() {
   };
 
   const crowdPercentage = Math.min((state.live_count / EXPECTED_CROWD) * 100, 100);
-  const isWasteHigh = state.current_waste > 15;
+  const isWasteHigh = state.current_waste > 15000;
 
   return (
     <div className="min-h-screen bg-slate-900 p-8 font-sans text-white">
@@ -51,8 +51,7 @@ function App() {
             Amingoan's Michelin Dining
           </h1>
           <div className="flex items-center gap-2 text-slate-400 mt-2">
-            <Clock size={16} />
-            <span>Auto-Detected Timeframe: <strong>{state.expectedMeal}</strong></span>
+            <span><strong>{state.expectedMeal}</strong></span>
           </div>
         </div>
         
@@ -70,7 +69,7 @@ function App() {
           <div className="grid grid-cols-2 gap-4 mb-6">
             <div><label className="block text-xs text-slate-400 mb-1">Rice (g)</label><input type="number" name="rice" value={foodInput.rice} onChange={handleInputChange} className="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-white outline-none focus:border-blue-500" /></div>
             <div><label className="block text-xs text-slate-400 mb-1">Dal (g)</label><input type="number" name="dal" value={foodInput.dal} onChange={handleInputChange} className="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-white outline-none focus:border-blue-500" /></div>
-            <div><label className="block text-xs text-slate-400 mb-1">Roti (count)</label><input type="number" name="roti" value={foodInput.roti} onChange={handleInputChange} className="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-white outline-none focus:border-blue-500" /></div>
+            <div><label className="block text-xs text-slate-400 mb-1">Roti (g)</label><input type="number" name="roti" value={foodInput.roti} onChange={handleInputChange} className="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-white outline-none focus:border-blue-500" /></div>
             <div><label className="block text-xs text-slate-400 mb-1">Sabzi (g)</label><input type="number" name="sabzi" value={foodInput.sabzi} onChange={handleInputChange} className="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-white outline-none focus:border-blue-500" /></div>
           </div>
           <div className="space-y-3">
@@ -93,18 +92,18 @@ function App() {
           </div>
           <div className={`bg-slate-800 rounded-2xl p-6 border shadow-xl transition-colors duration-300 ${isWasteHigh ? 'border-red-500/50 bg-red-900/10' : 'border-slate-700'}`}>
             <h2 className="text-xl font-semibold flex items-center gap-2 text-slate-200 mb-4"><Trash2 className={isWasteHigh ? "text-red-400" : "text-amber-400"} /> The Bin {isWasteHigh && <AlertTriangle className="text-red-400 animate-bounce" size={20} />}</h2>
-            <div className="flex items-end gap-2"><span className={`text-6xl font-bold ${isWasteHigh ? 'text-red-400' : 'text-amber-400'}`}>{Number(state.current_waste).toFixed(1)}</span><span className="text-lg text-slate-400 mb-2">kg</span></div>
+            <div className="flex items-end gap-2"><span className={`text-6xl font-bold ${isWasteHigh ? 'text-red-400' : 'text-amber-400'}`}>{Number(state.current_waste).toFixed(1)}</span><span className="text-lg text-slate-400 mb-2">g</span></div>
           </div>
         </div>
       </div>
       
-      <h2 className="text-2xl font-bold mb-4 text-white flex items-center gap-2">{state.isReading ? `Predictive AI (For Batch ${state.batchNumber + 1})` : `AI Predictions`}</h2>
+      <h2 className="text-2xl font-bold mb-4 text-white flex items-center gap-2">{state.isReading ? `Predictive AI (For Batch ${state.batchNumber + 1})` : `Projections`}</h2>
       <p className="text-slate-400 mb-6 text-sm bg-slate-800 inline-block px-3 py-1 rounded border border-slate-700">Status: {state.predictions.status}</p>
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <div className="bg-slate-800 rounded-2xl p-5 border border-slate-700"><p className="text-sm text-slate-400 mb-2">Target Rice</p><p className={`text-xl font-bold ${state.predictions.rice.includes('URGENT') ? 'text-red-400' : 'text-white'}`}>{state.predictions.rice}</p></div>
-        <div className="bg-slate-800 rounded-2xl p-5 border border-slate-700"><p className="text-sm text-slate-400 mb-2">Target Dal</p><p className="text-xl font-bold text-white">{state.predictions.dal}</p></div>
-        <div className="bg-slate-800 rounded-2xl p-5 border border-slate-700"><p className="text-sm text-slate-400 mb-2">Roti Velocity</p><p className="text-xl font-bold text-white">{state.predictions.roti}</p></div>
-        <div className={`bg-slate-800 rounded-2xl p-5 border ${state.predictions.sabzi.includes('WAIT') ? 'border-orange-500/50 bg-orange-900/20' : 'border-slate-700'}`}><p className="text-sm text-slate-400 mb-2">Sabzi Protocol</p><p className={`text-xl font-bold ${state.predictions.sabzi.includes('WAIT') ? 'text-orange-400' : 'text-white'}`}>{state.predictions.sabzi}</p></div>
+        <div className="bg-slate-800 rounded-2xl p-5 border border-slate-700"><p className="text-sm text-slate-400 mb-2">Projected Rice</p><p className={`text-xl font-bold ${state.predictions.rice.includes('URGENT') ? 'text-red-400' : 'text-white'}`}>{state.predictions.rice}</p></div>
+        <div className="bg-slate-800 rounded-2xl p-5 border border-slate-700"><p className="text-sm text-slate-400 mb-2">Projected Dal</p><p className="text-xl font-bold text-white">{state.predictions.dal}</p></div>
+        <div className="bg-slate-800 rounded-2xl p-5 border border-slate-700"><p className="text-sm text-slate-400 mb-2">Projected Rotis</p><p className="text-xl font-bold text-white">{state.predictions.roti}</p></div>
+        <div className={`bg-slate-800 rounded-2xl p-5 border ${state.predictions.sabzi.includes('WAIT') ? 'border-orange-500/50 bg-orange-900/20' : 'border-slate-700'}`}><p className="text-sm text-slate-400 mb-2">Projected Sabzi</p><p className={`text-xl font-bold ${state.predictions.sabzi.includes('WAIT') ? 'text-orange-400' : 'text-white'}`}>{state.predictions.sabzi}</p></div>
       </div>
     </div>
   );

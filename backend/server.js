@@ -56,7 +56,7 @@ async function fetchAIPrediction(sequenceWindow) {
     return {
       rice: `Cook ${aiData.Rice.toFixed(1)} kg`,
       dal: `Cook ${aiData.Dal.toFixed(1)} kg`,
-      roti: `Prepare ${Math.round(aiData.Roti)} count`, 
+      roti: `Cook ${aiData.Roti.toFixed(1)} kg`,
       sabzi: `Cook ${aiData.Sabzi.toFixed(1)} kg`,
       status: `Live LSTM Optimization (Batch ${systemState.batchNumber + 1})`
     };
@@ -116,12 +116,12 @@ setInterval(async () => {
   if (!systemState.isReading || !systemState.activeBatchId) return;
 
   const delta_people = Math.max(0, systemState.live_count - last_snapshot_people);
-  const delta_waste_kg = Math.max(0, systemState.current_waste - last_snapshot_waste);
+  const delta_waste_g = Math.max(0, systemState.current_waste - last_snapshot_waste);
   
   last_snapshot_people = systemState.live_count;
   last_snapshot_waste = systemState.current_waste;
 
-  const total_waste_g = delta_waste_kg * 1000;
+  const total_waste_g = delta_waste_g;
   const scores = { rice: 0.8, dal: 0.7, sabzi: 0.6, roti: 0.9 }; 
   
   const features = [
@@ -151,7 +151,7 @@ setInterval(async () => {
   // Log to MongoDB
   try {
     await MealBatch.findByIdAndUpdate(systemState.activeBatchId, { 
-      $push: { sensorData: { timestamp: new Date(), total_people: systemState.live_count, trash_weight_kg: systemState.current_waste } } 
+      $push: { sensorData: { timestamp: new Date(), total_people: systemState.live_count, trash_weight_g: systemState.current_waste } } 
     });
   } catch (error) { console.error("DB push failed:", error); }
 

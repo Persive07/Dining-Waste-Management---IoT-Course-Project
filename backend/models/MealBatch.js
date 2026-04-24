@@ -4,7 +4,7 @@ const mongoose = require('mongoose');
 const sensorDataSchema = new mongoose.Schema({
   timestamp: { type: Date, default: Date.now },
   total_people: { type: Number, default: 0 },
-  trash_weight_kg: { type: Number, default: 0 }
+  trash_weight_g: { type: Number, default: 0 }
 }, { _id: false }); 
 
 // The main 30-minute Batch schema
