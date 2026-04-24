@@ -1,13 +1,10 @@
 #include "esp_camera.h"
 #include <WiFi.h>
 
-// ===========================
-// Enter your WiFi credentials
-// ===========================
 const char* ssid = "OPPO Reno8 T 5G";
 const char* password = "JAISHRIRAM";
 
-// Manual pin configuration (AI Thinker or similar)
+// Manual pin configuration 
 #define PWDN_GPIO_NUM     32
 #define RESET_GPIO_NUM    -1
 #define XCLK_GPIO_NUM     0
@@ -115,7 +112,7 @@ void loop() {
       }
 
       esp_camera_fb_return(fb);
-      delay(30); // reduced delay for better fps
+      delay(30); 
     }
 
     Serial.println("Client disconnected");
